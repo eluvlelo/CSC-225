@@ -1,0 +1,173 @@
+# Time and Calendar Exercise
+# Create a system of classes to represent time, dates, and appointments in a calendar application.
+
+# Part 3: Appointment Class
+# Create an Appointment class that inherits from both Date and Time:
+
+# Create a new class DateTime that combines date and time information
+# Create an Appointment class that inherits from DateTime and adds:
+# A title attribute
+# A duration attribute (in minutes)
+# A location attribute
+# A description attribute
+# Add a method conflicts_with that checks if two appointments overlap
+# Implement a __str__ method to format the appointment information nicely
+# Part 4: Calendar Class
+# Create a Calendar class to manage a collection of appointments:
+
+# Initialize with a name and an empty list of appointments
+# Add methods to add and remove appointments
+# Create a method to find all appointments on a given date
+# Implement a method to find conflicts among all appointments
+# Add a method to print a formatted daily or weekly view of appointments
+# Part 5: Specialized Calendar Types
+# Create at least two specialized calendar types that inherit from Calendar:
+
+# WorkCalendar - with methods specific to work appointments
+# SchoolCalendar - with methods specific to academic appointments
+# Each specialized calendar might have its own rules about valid appointment times, conflict resolution, or display formats.
+
+# Testing
+# Create a script that demonstrates all features of your calendar system:
+
+# Create instances of different times, dates, and appointments
+# Test the validation methods
+# Test for appointment conflicts
+# Create specialized calendars and demonstrate their unique features
+# This exercise gives you practice with:
+
+# Multiple inheritance
+# Method overriding
+# Date and time manipulation
+# Complex validation logic
+# Designing a coherent class hierarchy
+# Submit your solution as well-documented Python code with appropriate comments and test cases.
+
+# THIS IS BASED ON THE BOOK BUT NOT FROM THE BOOK. -->
+
+
+import math
+
+class Time:
+    '''Represents time of day.
+    
+    Attributes: hours, minutes, seconds
+    '''
+    def __init__(self, hours, minutes, seconds):
+        self.hours = hours
+        self.minutes = minutes
+        self.seconds = seconds
+
+    #Formats the time as "HH:MM:SS"
+    def __str__(self):
+        return f"{self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"
+    
+    #Checks if the time is valid (hours 0-23, minutes 0-59, seconds 0-59)
+    def is_valid(self):
+        if (self.hours >= 0) and (self.minutes >= 0) and (self.seconds >= 0) and (self.hours <= 23) and (self.minutes <= 59) and (self.seconds <= 59):
+            return True
+    
+    
+    #Compares times chronologically
+    def __lt__(self, other):
+        assert self.is_valid() and other.is_valid()
+        if self.hours > other.hours:
+            return True
+        if self.hours == other.hours and self.minutes > other.minutes:
+            return True
+        if self.hours == other.hours and self.minutes == other.minutes and self.seconds > other.seconds:
+            return True
+        return False
+        
+    #Methods to add and subtract times, ensuring proper carry/borrow operations
+    def __add__(self, other): 
+        minutes = math.trunc((self.seconds + other.seconds)/60)
+        hours = math.trunc((self.minutes + other.minutes + minutes)/60)
+        self.seconds = (self.seconds + other.seconds) % 60
+        self.minutes = (self.minutes + other.minutes + minutes) % 60
+        self.hours = (self.hours + other.hours + hours ) % 24
+        return self
+
+    def __subtract__(self, other):
+        assert self.__lt__(other)   
+        self.seconds = self.seconds - other.seconds
+        if self.seconds < 0:
+            minutes = 1
+            self.seconds = 0
+        else: 
+            minutes = 0
+        self.minutes = self.minutes - other.minutes - minutes
+        if self.minutes < 0:
+            hours = 1
+            self.minutes = 0
+        else: 
+            hours = 0
+        self.hours = self.hours - other.hours - hours
+        return self
+
+
+# Implement __lt__ to compare dates chronologically
+# Add a method to calculate the day of the week for any date
+class Date: 
+    '''Represents calendar date
+    
+    Attributes: year, month, day
+    '''
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    #Formats the date as "YYYY-MM-DD"
+    def __str__(self):
+        return f"{self.year:04d}-{self.month:02d}-{self.day:02d}"
+
+    # Checks if the date is valid (considering month lengths and leap years)
+    def is_valid(self):
+        days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        if self.year % 4 == 0 and (self.year % 100 != 0 or self.year % 400 == 0):
+            days_in_month[2] = 29
+        if (1 <= self.month <= 12 and 1 <= self.day <= days_in_month[self.month]):
+            return True
+        return False
+    
+    #Compare dates chronologically
+    def __lt__(self, other):
+        assert self.is_valid() and other.is_valid()
+
+    #Add a method to calculate the day of the week for any date
+    #def day_of_week(self):
+
+
+
+    
+        
+time = Time(20,0,1)
+other = Time(20,0,0)
+print(time)
+print(other)
+print()
+print('Is', time, 'after', other)
+print(time.__lt__(other))
+print()
+print(time, '+', other)
+print(time.__add__(other))
+
+time = Time(20,0,0)
+other = Time(0,0,30)
+print()
+print(time, '-', other)
+print(time.__subtract__(other))
+#trouble with this problem
+print()
+
+date = Date(2025,2,29)
+print('Is', date, 'valid?')
+print(Date.is_valid(date))
+print()
+
+date = Date(2024,2,29)
+other = Date(2025,3,5)
+print('Is', date, 'after', other)
+print(date.__lt__(other))
+print()
