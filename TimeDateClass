@@ -1,41 +1,6 @@
 # Time and Calendar Exercise
 # Create a system of classes to represent time, dates, and appointments in a calendar application.
 
-# Part 3: Appointment Class
-# Create an Appointment class that inherits from both Date and Time:
-
-# Create a new class DateTime that combines date and time information
-# Create an Appointment class that inherits from DateTime and adds:
-# A title attribute
-# A duration attribute (in minutes)
-# A location attribute
-# A description attribute
-# Add a method conflicts_with that checks if two appointments overlap
-# Implement a __str__ method to format the appointment information nicely
-# Part 4: Calendar Class
-# Create a Calendar class to manage a collection of appointments:
-
-# Initialize with a name and an empty list of appointments
-# Add methods to add and remove appointments
-# Create a method to find all appointments on a given date
-# Implement a method to find conflicts among all appointments
-# Add a method to print a formatted daily or weekly view of appointments
-# Part 5: Specialized Calendar Types
-# Create at least two specialized calendar types that inherit from Calendar:
-
-# WorkCalendar - with methods specific to work appointments
-# SchoolCalendar - with methods specific to academic appointments
-# Each specialized calendar might have its own rules about valid appointment times, conflict resolution, or display formats.
-
-# Testing
-# Create a script that demonstrates all features of your calendar system:
-
-# Create instances of different times, dates, and appointments
-# Test the validation methods
-# Test for appointment conflicts
-# Create specialized calendars and demonstrate their unique features
-# This exercise gives you practice with:
-
 # Multiple inheritance
 # Method overriding
 # Date and time manipulation
@@ -43,34 +8,37 @@
 # Designing a coherent class hierarchy
 # Submit your solution as well-documented Python code with appropriate comments and test cases.
 
-# THIS IS BASED ON THE BOOK BUT NOT FROM THE BOOK. -->
-
-
 import math
 
+# Part 1: Time Class
+
 class Time:
-    '''Represents time of day.
+    '''Represents the time of day.
     
     Attributes: hours, minutes, seconds
     '''
+    # Create a Time class with attributes for hours, minutes, and seconds
     def __init__(self, hours, minutes, seconds):
         self.hours = hours
         self.minutes = minutes
         self.seconds = seconds
 
-    #Formats the time as "HH:MM:SS"
+    # Formats the time as "HH:MM:SS"
     def __str__(self):
-        return f"{self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"
+        s=  f"{self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"
+        return s
     
-    #Checks if the time is valid (hours 0-23, minutes 0-59, seconds 0-59)
+    # Checks if the time is valid (hours 0-23, minutes 0-59, seconds 0-59)
     def is_valid(self):
         if (self.hours >= 0) and (self.minutes >= 0) and (self.seconds >= 0) and (self.hours <= 23) and (self.minutes <= 59) and (self.seconds <= 59):
             return True
+        else:
+            return False
     
-    
-    #Compares times chronologically
+    # Compare times chronologically
     def __lt__(self, other):
-        assert self.is_valid() and other.is_valid()
+        assert self.is_valid(), 'self is not a valid Time'
+        assert other.is_valid(), 'other is not a valid Time'
         if self.hours > other.hours:
             return True
         if self.hours == other.hours and self.minutes > other.minutes:
@@ -79,15 +47,16 @@ class Time:
             return True
         return False
         
-    #Methods to add and subtract times, ensuring proper carry/borrow operations
+    # Adds times, ensuring proper carry/borrow operations
     def __add__(self, other): 
-        minutes = math.trunc((self.seconds + other.seconds)/60)
-        hours = math.trunc((self.minutes + other.minutes + minutes)/60)
+        minute = math.trunc((self.seconds + other.seconds)/60)
+        hour = math.trunc((self.minutes + other.minutes + minute)/60)
         self.seconds = (self.seconds + other.seconds) % 60
-        self.minutes = (self.minutes + other.minutes + minutes) % 60
-        self.hours = (self.hours + other.hours + hours ) % 24
+        self.minutes = (self.minutes + other.minutes + minute) % 60
+        self.hours = (self.hours + other.hours + hour) % 24
         return self
 
+    # Subtracts times, ensuring proper carry/borrow operations
     def __subtract__(self, other):
         assert self.__lt__(other)   
         self.seconds = self.seconds - other.seconds
@@ -104,70 +73,165 @@ class Time:
             hours = 0
         self.hours = self.hours - other.hours - hours
         return self
+    
+    def __subtract__(self, other):
+        assert self.__lt__(other)   
+        if self.seconds < other.seconds:
+            self.minutes -= 1
+            self.seconds += 60
+            self.seconds = self.seconds - other.seconds
+        else:
+            self.seconds = self.seconds - other.seconds
+        if (self.minutes - other.minutes) < 0:
+            self.hours -= 1
+            self.minutes += 60
+            self.minutes = self.minutes - other.minutes
+        else:
+            self.minutes = self.minutes - other.minutes
+        self.hours = self.hours - other.hours
+        return self
+        
+# Part 2: Date Class
 
-
-# Implement __lt__ to compare dates chronologically
-# Add a method to calculate the day of the week for any date
 class Date: 
-    '''Represents calendar date
+    '''Represents calendar date.
     
     Attributes: year, month, day
     '''
+    # Initialize with year, month, and day attributes
     def __init__(self, year, month, day):
         self.year = year
         self.month = month
         self.day = day
 
-    #Formats the date as "YYYY-MM-DD"
+    # Formats the date as "YYYY-MM-DD"
     def __str__(self):
         return f"{self.year:04d}-{self.month:02d}-{self.day:02d}"
 
     # Checks if the date is valid (considering month lengths and leap years)
     def is_valid(self):
+        # create list of days in each month
         days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        # change days in February depending on leap year
         if self.year % 4 == 0 and (self.year % 100 != 0 or self.year % 400 == 0):
             days_in_month[2] = 29
+        # checks if month is between 1 and 12 and if days are between 1 and corresponding days in list based on index of month
         if (1 <= self.month <= 12 and 1 <= self.day <= days_in_month[self.month]):
             return True
         return False
     
-    #Compare dates chronologically
+    # Compare dates chronologically
     def __lt__(self, other):
-        assert self.is_valid() and other.is_valid()
-
-    #Add a method to calculate the day of the week for any date
-    #def day_of_week(self):
-
-
-
-    
+        assert self.is_valid(), 'self is not a valid Date'
+        assert other.is_valid(), 'other is not a valid Date'
+        if self.year > other.year:
+            return True
+        if self.year == other.year and self.month > other.month:
+            return True
+        if self.year == other.year and self.month == other.month and self.day > other.day:
+            return True
+        return False 
         
-time = Time(20,0,1)
-other = Time(20,0,0)
-print(time)
-print(other)
+    # Calculate the day of the week for any date
+    # def day_of_week(self):
+    #     assert self.is_valid()
+    #     days = [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+    #     if self.year % 4 == 0 and (self.year % 100 != 0 or self.year % 400 == 0):
+    #     else:
+    #         days = days[]
+
+# Part 3: Appointment Class
+# Create an Appointment class that inherits from both Date and Time:
+
+# Create a new class DateTime that combines date and time information
+class DateTime:
+    '''Represents date and time.
+
+    Attributes: date, time
+    '''
+    def __init__(self, year, month, day, hours, minutes, seconds):
+        self.date = Date(year, month, day)
+        self.time = Time(hours, minutes, seconds)
+
+    def __str__(self):
+        return f"{self.date} {self.time}"
+
+# Create an Appointment class that inherits from DateTime
+class Appointment:
+    '''Represents appointment date and time.
+    
+    Attributes: datetime, title, duration(in minutes), location, description
+    '''
+    def __init__(self, year, month, day, hours, minutes, seconds, title, duration, location, description):
+        
+        self.datetime = DateTime(year, month, day, hours, minutes, seconds)
+        self.title = title
+        self.duration = duration
+        self.location = location
+        self.description = description
+
+    # Format the appointment information nicely
+    def __str__(self):
+        return f"Your {self.title} appointment for a {self.description} at {self.location} is at {self.datetime} and lasts {self.duration} minutes."
+
+    # Checks if two appointments overlap
+    def conflicts_with(self, other):
+        if self.datetime == other.datetime:
+            return False
+        # add duration(in minutes) to appointment time and check if result is equal to other appointment
+        else: 
+            hours = abs(self.minutes + self.duration)
+            self.minutes = (self.minutes + self.duration) % 60
+            self.hours = (self.hours + hours) % 24
+            self.datetime = DateTime(self.year, self.month, self.day, self.hours, self.minutes, self.seconds)
+            if self.datetime > other.datetime:
+                return True
+
+
+time = Time(24,60,60)
+print(f"Is {time} valid:")
+print(time.is_valid())
 print()
-print('Is', time, 'after', other)
+
+time = Time(23,59,59)
+other = Time(23,59,58)
+print(f"Is {time} after {other}?")
 print(time.__lt__(other))
 print()
-print(time, '+', other)
-print(time.__add__(other))
 
-time = Time(20,0,0)
-other = Time(0,0,30)
+time = Time(1,30,30)
+other = Time(0,29,30)
+print(f"{time} + {other} =")
+print(time.__add__(other))
 print()
-print(time, '-', other)
+
+time = Time(10,0,0)
+other = Time(0,0,1)
+print(f"{time} - {other} =")
 print(time.__subtract__(other))
-#trouble with this problem
 print()
 
 date = Date(2025,2,29)
-print('Is', date, 'valid?')
-print(Date.is_valid(date))
+print(f"Is {date} valid?")
+print(date.is_valid())
 print()
 
 date = Date(2024,2,29)
-other = Date(2025,3,5)
-print('Is', date, 'after', other)
+print(f"Is {date} valid?")
+print(date.is_valid())
+print()
+
+date = Date(2025,3,7)
+other = Date(2025,3,6)
+print(f"Is {date} after {other}?")
 print(date.__lt__(other))
 print()
+
+appointment = Appointment(2025, 3, 7, 2, 0, 0, 'Optometrist', 60, 'LensCrafters, Cambridge', 'comprehensive eye exam')
+other = Appointment(2025, 3, 7, 2, 0, 0, 'Doctors', 60, 'EBNHC, Winthrop', 'yearly checkup')
+print(appointment)
+print()
+print(other)
+print()
+print('Do these appointments overlap?')
+print(appointment.conflicts_with(other))
