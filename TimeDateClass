@@ -18,14 +18,14 @@ class Time:
     Attributes: hours, minutes, seconds
     '''
     # Create a Time class with attributes for hours, minutes, and seconds
-    def __init__(self, hours, minutes, seconds):
+    def __init__(self, hours=0, minutes=0, seconds=0):
         self.hours = hours
         self.minutes = minutes
         self.seconds = seconds
 
     # Formats the time as "HH:MM:SS"
     def __str__(self):
-        s=  f"{self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"
+        s = f"{self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"
         return s
     
     # Checks if the time is valid (hours 0-23, minutes 0-59, seconds 0-59)
@@ -57,23 +57,6 @@ class Time:
         return self
 
     # Subtracts times, ensuring proper carry/borrow operations
-    def __subtract__(self, other):
-        assert self.__lt__(other)   
-        self.seconds = self.seconds - other.seconds
-        if self.seconds < 0:
-            minutes = 1
-            self.seconds = 0
-        else: 
-            minutes = 0
-        self.minutes = self.minutes - other.minutes - minutes
-        if self.minutes < 0:
-            hours = 1
-            self.minutes = 0
-        else: 
-            hours = 0
-        self.hours = self.hours - other.hours - hours
-        return self
-    
     def __subtract__(self, other):
         assert self.__lt__(other)   
         if self.seconds < other.seconds:
@@ -121,7 +104,7 @@ class Date:
         return False
     
     # Compare dates chronologically
-    def __lt__(self, other):
+    def __after__(self, other):
         assert self.is_valid(), 'self is not a valid Date'
         assert other.is_valid(), 'other is not a valid Date'
         if self.year > other.year:
@@ -163,8 +146,13 @@ class Appointment:
     Attributes: datetime, title, duration(in minutes), location, description
     '''
     def __init__(self, year, month, day, hours, minutes, seconds, title, duration, location, description):
-        
         self.datetime = DateTime(year, month, day, hours, minutes, seconds)
+        self.date = Date(year, month, day)
+        self.time = Time(hours, minutes, seconds)
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hours = hours
         self.title = title
         self.duration = duration
         self.location = location
@@ -176,17 +164,94 @@ class Appointment:
 
     # Checks if two appointments overlap
     def conflicts_with(self, other):
-        if self.datetime == other.datetime:
+        if self.date.__after__(other.date) or other.date.__after__(self.date):
             return False
-        # add duration(in minutes) to appointment time and check if result is equal to other appointment
-        else: 
-            hours = abs(self.minutes + self.duration)
-            self.minutes = (self.minutes + self.duration) % 60
-            self.hours = (self.hours + hours) % 24
-            self.datetime = DateTime(self.year, self.month, self.day, self.hours, self.minutes, self.seconds)
-            if self.datetime > other.datetime:
+        elif self.date.__after__(other.date) == other.date.__after__(self.date) == False:
+            if self.time.__lt__(other.time) == other.time.__lt__(self.time) == False:
                 return True
+            elif other.time.__lt__(self.time):
+                minutes = self.duration % 60
+                hours = math.trunc(self.duration/60)
+                duration = Time(hours, minutes, 0)
+                self.time = self.time.__add__(duration)
+                if self.time.__lt__(other.time):
+                    return True
+                elif self.time.__lt__(other.time) == other.time.__lt__(self.time) == False:
+                    return True
+                else:
+                    return False
+            elif self.time.__lt__(other.time):
+                minutes = self.duration % 60
+                hours = math.trunc(self.duration/60)
+                duration = Time(hours, minutes, 0)
+                other.time = other.time.__add__(duration)
+                if other.time.__lt__(self.time):
+                    return True
+                elif self.time.__lt__(other.time) == other.time.__lt__(self.time) == False:
+                    return True
+                else: 
+                    return False
+                
+# Part 4: Calendar Class
+# Create a Calendar class to manage a collection of appointments:
 
+class Calendar:
+    '''Collection of appointments.
+
+    Attributes:
+    '''
+    # Initialize with a name and an empty list of appointments
+    def __init__(self, name):
+        self.name = name
+        self.appointments = []
+    
+    # Add methods to add appointments
+    def add_appt(self, appt):
+        self.appointments.append(appt)
+
+    # Add methods to remove appointments
+    def remove_appt(self, appt):
+        if appt in self.appointments:
+            self.appointments.remove(appt)
+
+    # Find all appointments on a given date
+    def find_appt(self, date):
+        return [appt for appt in self.appointments if (appt.year, appt.month, appt.day) == (date.year, date.month, date.day)]
+
+    # Find conflicts among all appointments
+    def find_conflicts(self):
+        conflicts = []
+        for i in range(len(self.appointments)):
+            for j in range(i + 1, len(self.appointments)):
+                 if self.appointments[i].conflicts_with(self.appointments[j]):
+                    conflicts.append((self.appointments[i], self.appointments[j]))
+        return conflicts
+
+    # Print a formatted daily or weekly view of appointments
+    def daily_view(self, year, month, day):
+        print(f"Weekly view for {year}[{month:02}-{day:02}]")
+        appts = self.find_appt(Date(year, month, day))
+        for appt in sorted(appt, key=):
+            print(appt)
+
+# Part 5: Specialized Calendar Types
+# Create at least two specialized calendar types that inherit from Calendar:
+
+# WorkCalendar - with methods specific to work appointments
+class WorkCalendar(Calendar):
+    def add_appt(self, appt):
+        if 9 <= appt.hours < 17:
+            super().add_appt(appt)
+        else:
+            print("Work appointments must be between 9 am and 5 pm")
+
+# SchoolCalendar - with methods specific to academic appointments
+class SchoolCalendar(Calendar):
+    def add_appt(self, appt):
+        if appt.duration <= 180:
+            super().add_appt(appt)
+        else:
+            print("School appointments cannot exceed 3 hours.")
 
 time = Time(24,60,60)
 print(f"Is {time} valid:")
@@ -224,14 +289,38 @@ print()
 date = Date(2025,3,7)
 other = Date(2025,3,6)
 print(f"Is {date} after {other}?")
-print(date.__lt__(other))
+print(date.__after__(other))
 print()
 
-appointment = Appointment(2025, 3, 7, 2, 0, 0, 'Optometrist', 60, 'LensCrafters, Cambridge', 'comprehensive eye exam')
-other = Appointment(2025, 3, 7, 2, 0, 0, 'Doctors', 60, 'EBNHC, Winthrop', 'yearly checkup')
+appointment = Appointment(2025, 3, 5, 4, 45, 0, 'Optometrist', 60, 'LensCrafters, Cambridge', 'comprehensive eye exam')
+other = Appointment(2025, 3, 5, 4, 45, 0, 'Doctors', 60, 'EBNHC, Winthrop', 'yearly checkup')
 print(appointment)
 print()
 print(other)
 print()
 print('Do these appointments overlap?')
 print(appointment.conflicts_with(other))
+print()
+
+appointment = Appointment(2025, 3, 5, 4, 45, 0, 'Optometrist', 60, 'LensCrafters, Cambridge', 'comprehensive eye exam')
+other = Appointment(2025, 3, 5, 5, 45, 0, 'Doctors', 60, 'EBNHC, Winthrop', 'yearly checkup')
+print(appointment)
+print()
+print(other)
+print()
+print('Do these appointments overlap?')
+print(appointment.conflicts_with(other))
+print()
+
+appt1 = Appointment(2025, 3, 7, 14, 0, 0, "Safety Briefing", 30, "Conference Room", "Review Safety Rules")
+appt2 = Appointment(2025, 3, 7, 14, 30, 0, "Training", 60, "Computer Room", "Work Training")
+print(appt1)
+print(appt2)
+print()
+print('Do these appointments overlap?')
+print(appt1.conflicts_with(appt2))
+
+work_cal = WorkCalendar("Work")
+work_cal.add_appt(appt1)
+work_cal.add_appt(appt2)
+work_cal.daily_view(2025, 3, 7)
