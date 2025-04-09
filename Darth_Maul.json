@@ -1,0 +1,20 @@
+{
+    "name": "Darth Maul",
+    "height": "175",
+    "mass": "80",
+    "hair_color": "none",
+    "skin_color": "red",
+    "eye_color": "yellow",
+    "birth_year": "54BBY",
+    "gender": "male",
+    "films": [
+        "The Phantom Menace"
+    ],
+    "species": [
+        "Zabrak"
+    ],
+    "vehicles": [],
+    "starships": [],
+    "url": "https://swapi.dev/api/people/44/",
+    "homeworld": "Dathomir"
+}

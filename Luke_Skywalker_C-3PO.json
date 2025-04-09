@@ -1,0 +1,16 @@
+{
+    "characters": [
+        "Luke Skywalker",
+        "C-3PO"
+    ],
+    "films": [
+        "A New Hope",
+        "The Empire Strikes Back",
+        "Revenge of the Sith",
+        "Return of the Jedi"
+    ],
+    "species": [],
+    "vehicles": [],
+    "starships": [],
+    "homeworld": "Tatooine"
+}

@@ -1,0 +1,21 @@
+{
+    "name": "Luke Skywalker",
+    "height": "172",
+    "mass": "77",
+    "hair_color": "blond",
+    "skin_color": "fair",
+    "eye_color": "blue",
+    "birth_year": "19BBY",
+    "gender": "male",
+    "films": [
+        "A New Hope",
+        "The Empire Strikes Back",
+        "Return of the Jedi",
+        "Revenge of the Sith"
+    ],
+    "species": [],
+    "vehicles": [],
+    "starships": [],
+    "url": "https://swapi.dev/api/people/1/",
+    "homeworld": "Tatooine"
+}

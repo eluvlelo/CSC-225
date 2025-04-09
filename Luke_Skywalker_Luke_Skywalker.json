@@ -1,0 +1,29 @@
+{
+    "characters": [
+        "Luke Skywalker",
+        "Luke Skywalker"
+    ],
+    "films": [
+        "A New Hope",
+        "The Empire Strikes Back",
+        "Revenge of the Sith",
+        "Return of the Jedi"
+    ],
+    "species": [],
+    "vehicles": [
+        "Snowspeeder",
+        "Imperial Speeder Bike"
+    ],
+    "starships": [
+        "Imperial shuttle",
+        "X-wing"
+    ],
+    "height": "172",
+    "mass": "77",
+    "birth_year": "19BBY",
+    "gender": "male",
+    "hair_color": "'blond'",
+    "skin_color": "'fair'",
+    "eye_color": "'blue'",
+    "homeworld": "Tatooine"
+}
